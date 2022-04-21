@@ -11,10 +11,10 @@
                     <p class="text-gray-700 text-base">{{ candidate.description }}</p>
                 </div>
                 <div class="px-6 pt-4 pb-2">
-                    <span v-for="(strength, index) in JSON.parse(candidate.strengths)" :key="index"
+                  <!--   <span v-for="(strength, index) in JSON.parse(candidate.strengths)" :key="index"
                         class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">{{
                             strength
-                        }}</span>
+                        }}</span> -->
                 </div>
                 <div class="p-6 float-right">
                     <button
@@ -29,6 +29,13 @@
 
 <script>
 export default {
-    props: ['candidates'],
+    name: 'Candidates',
+    data() {
+        return {
+            candidates: [
+                { id: 1, name: "Jhon", description: "full-stack developer", strendths: ["php"] }
+            ]
+        }
+    }
 }
 </script>
