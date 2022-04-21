@@ -1,6 +1,7 @@
 <template>
   <div>
-    <h1>Welcome</h1>
+    <h1>Welcome to the hiring platform</h1>
+    <router-link to="/companies-listing">Go to company listing</router-link>
   </div>
 </template>
 
