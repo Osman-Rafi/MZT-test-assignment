@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->integer('coins');
             $table->unsignedBigInteger('company_id');
+            $table->foreign('company_id')->reference('id')->on('companies');
             $table->timestamps();
         });
     }
@@ -28,6 +29,9 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('wallets', function (Blueprint $table) {
+            $table->dropForeign('comapany_id');
+        });
         Schema::dropIfExists('wallets');
     }
 };

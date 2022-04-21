@@ -14,7 +14,7 @@ const routes = [
   },
   {
     path: "/company/:id",
-    component: () => import("/views/Candidates.vue"),
+    component: () => import("./views/Candidates.vue"),
   },
   /* {
         path:'*',

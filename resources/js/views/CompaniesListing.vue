@@ -3,7 +3,9 @@
     <template v-if="companies.length">
       <div v-for="company in companies" :key="company.id">
         <div>{{ company.name }}</div>
-        <button href="/">Enter {{ company.name }}</button>
+        <router-link :to="'/company/' + company.id">
+          Enter {{ company.name }}
+        </router-link>
       </div>
     </template>
     <template v-else-if="!companies.length && !loading">
