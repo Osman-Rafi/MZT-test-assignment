@@ -23,9 +23,16 @@ class CandidateController extends Controller
             'company_id' => 'required|numeric',
         ]);
 
-        Wallet::select('id', 'coins')
+        $coins = Wallet::select('id', 'coins')
             ->where('company_id', $request->company_id)
+            ->where('coins', '>=', 5)
             ->decrement('coins', 5);
+
+        if ($coins) {
+            return response()->json($wallet);
+        } else {
+            return response()->json(['error' => 'You don\'t have enough coins'], 422);
+        }
     }
 
     public function hire()
