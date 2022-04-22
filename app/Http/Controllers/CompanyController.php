@@ -16,7 +16,6 @@ class CompanyController extends Controller
     public function getAllCandidates(Company $company)
     {
         $coins = $company->wallet->coins;
-        return $coins;
         $candidates = Candidate::all();
 
         return response()->json([
