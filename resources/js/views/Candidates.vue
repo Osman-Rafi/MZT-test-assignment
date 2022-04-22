@@ -78,7 +78,9 @@ export default {
       formData.append("company_id", this.$route.params.id);
       try {
         const res = await axios.post(`/api/contact-with-candidate`, formData);
-        console.log(res);
+        if (res) {
+          this.coins = this.coins -= 5;
+        }
       } catch (e) {
         console.error(e);
       }
