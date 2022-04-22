@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\CompanyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -21,3 +22,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/get-all-companies-list', [CompanyController::class, 'getAllCompanies']);
 Route::get('/get-candidates-list-and-coins/{company}', [CompanyController::class, 'getAllCandidates']);
+Route::post('/contact-with-candidate', [CandidateController::class, 'contactWithCandidate']);

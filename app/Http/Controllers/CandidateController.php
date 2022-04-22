@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Candidate;
 use App\Models\Company;
+use App\Models\Wallet;
+use Illuminate\Http\Request;
 
 class CandidateController extends Controller
 {
@@ -14,10 +16,16 @@ class CandidateController extends Controller
         return view('candidates.index', compact('candidates', 'coins'));
     }
 
-    public function contact()
+    public function contactWithCandidate(Request $request)
     {
-        // @todo
-        // Your code goes here...
+        $validatedData = $request->validate([
+            'candidate_id' => 'required|numeric',
+            'company_id' => 'required|numeric',
+        ]);
+
+        Wallet::select('id', 'coins')
+            ->where('company_id', $request->company_id)
+            ->decrement('coins', 5);
     }
 
     public function hire()

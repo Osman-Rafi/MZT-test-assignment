@@ -27,6 +27,7 @@
         </div>
         <div class="p-6 float-right">
           <button
+            @click="contactCandidate(candidate)"
             class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
           >
             Contact
@@ -66,6 +67,18 @@ export default {
         );
         this.candidates = res.data.candidates;
         this.coins = res.data.coins;
+      } catch (e) {
+        console.error(e);
+      }
+    },
+
+    async contactCandidate(candidate) {
+      const formData = new FormData();
+      formData.append("candidate_id", candidate.id);
+      formData.append("company_id", this.$route.params.id);
+      try {
+        const res = await axios.post(`/api/contact-with-candidate`, formData);
+        console.log(res);
       } catch (e) {
         console.error(e);
       }
