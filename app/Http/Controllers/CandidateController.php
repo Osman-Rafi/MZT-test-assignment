@@ -29,7 +29,7 @@ class CandidateController extends Controller
             ->decrement('coins', 5);
 
         if ($coins) {
-            return response()->json($wallet);
+            return response()->json($coins);
         } else {
             return response()->json(['error' => 'You don\'t have enough coins'], 422);
         }
