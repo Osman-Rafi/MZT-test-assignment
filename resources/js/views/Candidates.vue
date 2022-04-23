@@ -83,12 +83,14 @@ export default {
         formData.append("company_id", this.$route.params.id);
         formData.append("candidate_email", candidate.email);
         try {
+          alert("Sending email to the candidate....");
           const res = await axios.post(`/api/contact-with-candidate`, formData);
-          if (res) {
+          if (res.data.success) {
             this.coins = this.coins -= 5;
+            alert("Email sent successfully");
           }
         } catch (e) {
-          console.error(e);
+          alert(e);
         }
       }
     },
