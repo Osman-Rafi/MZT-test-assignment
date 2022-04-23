@@ -7,11 +7,14 @@ use App\Models\Candidate;
 use App\Models\Company;
 use App\Models\ContactLog;
 use App\Models\Wallet;
+use App\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 class CandidateController extends Controller
 {
+    use ApiResponser;
+
     public function index()
     {
         $candidates = Candidate::all();
@@ -32,9 +35,6 @@ class CandidateController extends Controller
         $company_name = Company::find($attr['company_id'])->name;
         $candidate_name = $attr['candidate_name'];
 
-        /* Check if enough coins exists */
-        $coins_remaining = Wallet::select('coins')->where('company_id', $attr['company_id'])->first()->coins;
-
         if ($this->coinTransaction(5, $attr['company_id'], 'decrement')) {
             /* Send email to candidate */
             Mail::to($attr['candidate_email'])->send(new ContactCandidateMail($candidate_name, $company_name));
@@ -45,18 +45,11 @@ class CandidateController extends Controller
                     'company_id' => $attr['company_id'],
                     'candidate_id' => $attr['candidate_id'],
                 ]);
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Contacted successfully',
-                ], 200);
             }
+            return $this->successStatus(true, 'Mail sent successfully.', 200);
         } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'You don\'t have enough coins to contact this candidate',
-            ], 422);
+            return $this->successStatus(false, 'You dont\'t have enough coins to contact a candidate', 422);
         }
-
     }
 
     public function coinTransaction($coins, $company_id, $trasaction_type)
