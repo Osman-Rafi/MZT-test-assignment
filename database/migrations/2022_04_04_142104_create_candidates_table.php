@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('email');
             $table->text('description');
             $table->json('strengths');
+            $table->unsignedBigInteger('hired_by')->nullable();
+            $table->foreign('hired_by')->references('id')->on('companies');
             $table->timestamps();
         });
     }
@@ -30,6 +32,9 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('candidates', function (Blueprint $table) {
+            $table->dropForeign('hired_by');
+        });
         Schema::dropIfExists('candidates');
     }
 };

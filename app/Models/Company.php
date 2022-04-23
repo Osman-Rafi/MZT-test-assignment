@@ -13,4 +13,8 @@ class Company extends Model
     {
         return $this->hasOne(Wallet::class);
     }
+    public function candidates()
+    {
+        return $this->hasMany(Candidate::class);
+    }
 }
