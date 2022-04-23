@@ -31,9 +31,9 @@ class CandidateController extends Controller
         $company_name = Company::find($attr['company_id'])->name;
         $candidate_name = $attr['candidate_name'];
 
-        $coins = Wallet::select('id', 'coins')->where('company_id', $attr['company_id'])->where('coins', '>=', 5);
+        $coins_remaining = Wallet::select('coins')->where('company_id', $attr['company_id'])->first()->coins;
 
-        if ($coins) {
+        if ($coins_remaining >= 5) {
             /* Send email to the selected candidate */
             Mail::to($attr['candidate_email'])->send(new ContactCandidateMail($candidate_name, $company_name));
 
