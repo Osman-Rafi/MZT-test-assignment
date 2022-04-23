@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ContactCandidateMail;
+use App\Mail\HiringConfirmation;
 use App\Models\Candidate;
 use App\Models\Company;
 use App\Models\ContactLog;
@@ -68,9 +69,37 @@ class CandidateController extends Controller
         }
         return false;
     }
-    public function hire()
+    public function hireCandidate(Request $request)
     {
-        // @todo
-        // Your code goes here...
+        /* Validate request data */
+        $attr = $request->validate([
+            'candidate_id' => 'required|numeric',
+            'company_id' => 'required|numeric',
+        ]);
+
+        /* find candidate & company details */
+        $candidate = Candidate::find($attr['candidate_id'])->first();
+        $company = Company::find($attr['company_id'])->first();
+
+        /* check if the candidate is available for hire */
+        if ($candidate->hired_by !== null) {
+            return $this->successStatus(false, 'Candidate has already been hired by another company', 422);
+        } else {
+            /* checking if the candidate has contacted before by the company than hire him/her */
+            if (ContactLog::where('candidate_id', $candidate->id)->where('company_id', $company->id)->exists()) {
+                /* make a log for hiring */
+                Candidate::find($candidate->id)->update(['hired_by' => $company->id]);
+
+                /* send an confirmation email to the candidate */
+                Mail::to($candidate->email)->send(new HiringConfirmation($candidate->name, $company->name));
+
+                /* put back 5 coins to company wallet */
+                $this->coinTransaction(5, $company->id, 'increment');
+
+                return $this->successStatus(true, 'Candidate hired successfully.', 200, ['candidate_id' => $candidate->id, 'company_id' => $company->id]);
+            } else {
+                return $this->successStatus(false, 'You must contact with this candidate before hire.', 422);
+            }
+        }
     }
 }
