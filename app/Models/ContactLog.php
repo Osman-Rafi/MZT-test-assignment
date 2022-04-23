@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class ContactLog extends Model
 {
     use HasFactory;
+    protected $fillable = ['company_id', 'candidate_id'];
 }
