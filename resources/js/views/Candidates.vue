@@ -75,7 +75,9 @@ export default {
     async contactCandidate(candidate) {
       const formData = new FormData();
       formData.append("candidate_id", candidate.id);
+      formData.append("candidate_name", candidate.name);
       formData.append("company_id", this.$route.params.id);
+      formData.append("candidate_email", candidate.email);
       try {
         const res = await axios.post(`/api/contact-with-candidate`, formData);
         if (res) {
