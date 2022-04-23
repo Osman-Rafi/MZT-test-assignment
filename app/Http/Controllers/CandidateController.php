@@ -21,6 +21,7 @@ class CandidateController extends Controller
 
     public function contactWithCandidate(Request $request)
     {
+        /* Validate request data */
         $attr = $request->validate([
             'candidate_id' => 'required|numeric',
             'candidate_name' => 'required|string',
@@ -31,33 +32,49 @@ class CandidateController extends Controller
         $company_name = Company::find($attr['company_id'])->name;
         $candidate_name = $attr['candidate_name'];
 
+        /* Check if enough coins exists */
         $coins_remaining = Wallet::select('coins')->where('company_id', $attr['company_id'])->first()->coins;
 
-        if ($coins_remaining >= 5) {
-            /* Send email to the selected candidate */
+        if ($this->coinTransaction(5, $attr['company_id'], 'decrement')) {
+            /* Send email to candidate */
             Mail::to($attr['candidate_email'])->send(new ContactCandidateMail($candidate_name, $company_name));
 
-            /* Cost 5 coins for each contact */
-            Wallet::select('id', 'coins')
-                ->where('company_id', $attr['company_id'])
-                ->where('coins', '>=', 5)
-                ->decrement('coins', 5);
-
             /* Make a log for this contact */
-            $contactLog = new ContactLog;
-            $contactLog->candidate_id = $attr['candidate_id'];
-            $contactLog->company_id = $attr['company_id'];
-            $contactLog->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Contacted successfully',
-            ], 200);
+            if (!ContactLog::where('company_id', $attr['company_id'])->where('candidate_id', $attr['candidate_id'])->exists()) {
+                ContactLog::create([
+                    'company_id' => $attr['company_id'],
+                    'candidate_id' => $attr['candidate_id'],
+                ]);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Contacted successfully',
+                ], 200);
+            }
         } else {
-            return response()->json(['error' => 'You don\'t have enough coins'], 422);
+            return response()->json([
+                'success' => false,
+                'message' => 'You don\'t have enough coins to contact this candidate',
+            ], 422);
         }
+
     }
 
+    public function coinTransaction($coins, $company_id, $trasaction_type)
+    {
+        if ($trasaction_type == 'increment') {
+            Wallet::where('company_id', $company_id)->increment('coins', $coins);
+            return true;
+        } elseif ($trasaction_type == 'decrement') {
+            $coins_remaining = Wallet::where('company_id', $company_id)->first()->coins;
+
+            if ($coins_remaining >= $coins) {
+                Wallet::where('company_id', $company_id)->decrement('coins', $coins);
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
     public function hire()
     {
         // @todo
