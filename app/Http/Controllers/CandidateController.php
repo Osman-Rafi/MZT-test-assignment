@@ -52,7 +52,7 @@ class CandidateController extends Controller
         }
     }
 
-    public function coinTransaction($coins, $company_id, $trasaction_type)
+    private function coinTransaction($coins, $company_id, $trasaction_type)
     {
         if ($trasaction_type == 'increment') {
             Wallet::where('company_id', $company_id)->increment('coins', $coins);
