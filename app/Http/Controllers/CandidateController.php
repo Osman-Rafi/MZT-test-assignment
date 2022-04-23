@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Candidate;
 use App\Models\Company;
+use App\Models\ContactLog;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
 
@@ -29,7 +30,15 @@ class CandidateController extends Controller
             ->decrement('coins', 5);
 
         if ($coins) {
-            return response()->json($coins);
+            $contactLog = new ContactLog;
+            $contactLog->candidate_id = $request->candidate_id;
+            $contactLog->company_id = $request->company_id;
+            $contactLog->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Contacted successfully',
+            ], 200);
         } else {
             return response()->json(['error' => 'You don\'t have enough coins'], 422);
         }
