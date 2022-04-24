@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="">
     <div class="p-10">
       <h1 class="text-4xl font-bold">Candidates</h1>
       <h2>Coins: {{ coins }}</h2>
@@ -30,14 +30,22 @@
             @click="contactCandidate(candidate)"
             class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
           >
-            Contact
+            <div class="flex">
+              <vue-simple-spinner size="small" class="mt-1" />
+              <span class="ml-3">Contact</span>
+            </div>
           </button>
           <button
             @click="hireCandidate(candidate)"
-            class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 hover:bg-teal-100 rounded shadow"
+            class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
           >
-            <template v-if="candidate.hired_by">Hired</template>
-            <template v-else>Hire</template>
+            <div class="flex">
+              <vue-simple-spinner size="small" class="mt-1" />
+              <span class="ml-3">
+                <template v-if="candidate.hired_by">Hired</template>
+                <template v-else>Hire</template>
+              </span>
+            </div>
           </button>
         </div>
       </div>
@@ -47,9 +55,13 @@
 
 <script>
 import axios from "axios";
+import Spinner from "vue-simple-spinner";
 export default {
   name: "Candidates",
 
+  components: {
+    Spinner,
+  },
   data() {
     return {
       candidates: [],
