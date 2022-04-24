@@ -1,8 +1,8 @@
 <template>
   <div class="">
-    <div class="p-10">
-      <h1 class="text-4xl font-bold">Candidates</h1>
-      <h2>Coins: {{ coins }}</h2>
+    <div class="p-10 bg-indigo-200 flex justify-between">
+      <h1 class="text-4xl font-bold">Candidates List</h1>
+      <h2 class="text-3xl">Coins: {{ coins }}</h2>
     </div>
     <div
       class="p-10 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-5"
@@ -26,14 +26,47 @@
           >
         </div>
         <div class="p-6 float-right">
-          <CandidateActionButtons
-            :candidate="candidate"
-            :loading="loading"
-            :contact-req-on-progress="contactReqOnProgress"
-            :hire-req-on-progress="hireReqOnProgress"
-            @contact-candidate="contactCandidate(candidate)"
-            @hire-candidate="hireCandidate(candidate)"
-          />
+          <button
+            @click="contactCandidate(candidate, index)"
+            class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+          >
+            <div class="flex">
+              <vue-simple-spinner
+                v-if="actionButtonsStatus[index].contact"
+                size="small"
+                class="mt-1"
+              />
+              <span class="ml-3">
+                <template v-if="actionButtonsStatus[index].contact"
+                  >Contacting..</template
+                >
+                <template v-else>Contact</template>
+              </span>
+            </div>
+          </button>
+          <button v-if="candidate.hired_by" class="mx-5">Hired</button>
+          <button
+            v-else
+            @click="hireCandidate(candidate, index)"
+            class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+          >
+            <div class="flex">
+              <vue-simple-spinner
+                v-if="actionButtonsStatus[index].hire"
+                size="small"
+                class="mt-1"
+              />
+              <span class="ml-3">
+                <template v-if="candidate.hired_by">Hired</template>
+                <template v-else>
+                  <template v-if="actionButtonsStatus[index].hire"
+                    >Hiring..</template
+                  >
+                  <template v-else>Hire</template>
+                </template>
+              </span>
+            </div>
+          </button>
         </div>
       </div>
     </div>
@@ -42,71 +75,74 @@
 
 <script>
 import axios from "axios";
-import CandidateActionButtons from "../components/CandidateActionButtons.vue";
+import Spinner from "vue-simple-spinner";
 export default {
   name: "Candidates",
 
   components: {
-    CandidateActionButtons,
+    Spinner,
   },
   data() {
     return {
       candidates: [],
       coins: 0,
-      loading: false,
-      contactReqOnProgress: false,
-      hireReqOnProgress: false,
+      actionButtonsStatus: [],
     };
   },
 
-  created() {
-    this.fetchCadidatesListAndCoins();
+  async created() {
+    await this.fetchCadidatesListAndCoins();
+
+    for (let i = 0; i < this.candidates.length; i++) {
+      this.actionButtonsStatus.push({
+        contact: false,
+        hire: false,
+      });
+    }
   },
 
   methods: {
     async fetchCadidatesListAndCoins() {
-      this.loading = true;
       try {
         const res = await axios.get(
           `/api/get-candidates-list-and-coins/${this.$route.params.id}`
         );
         this.candidates = res.data.candidates;
         this.coins = res.data.coins;
-        this.loading = false;
       } catch (e) {
         console.error(e);
       }
     },
 
-    async contactCandidate(candidate) {
+    async contactCandidate(candidate, index) {
       if (this.coins < 5) {
         alert("You don't have enough coins to contact this candidate");
         return;
       } else {
+        this.actionButtonsStatus[index].contact = true;
         const formData = new FormData();
         formData.append("candidate_id", candidate.id);
         formData.append("candidate_name", candidate.name);
         formData.append("company_id", this.$route.params.id);
         formData.append("candidate_email", candidate.email);
         try {
-          this.contactReqOnProgress = true;
           const res = await axios.post(`/api/contact-with-candidate`, formData);
           if (res.data.success) {
             this.coins = this.coins -= 5;
+            this.actionButtonsStatus[index].contact = false;
             alert("Email sent successfully");
           }
-          this.contactReqOnProgress = false;
         } catch (e) {
           alert(e);
         }
       }
     },
-    async hireCandidate(candidate) {
+    async hireCandidate(candidate, index) {
+      this.actionButtonsStatus[index].hire = true;
       const formData = new FormData();
       formData.append("candidate_id", candidate.id);
       formData.append("company_id", this.$route.params.id);
       try {
-        this.hireReqOnProgress = true;
         const res = await axios.post(`/api/hire-candidate`, formData);
         if (res.data.success) {
           const data = res.data.data;
@@ -118,13 +154,14 @@ export default {
                 hired_by: data.hired_by,
               };
               this.candidates.splice(index, 1, newCandidate);
-              alert("Candidate hired successfully");
+              this.coins = this.coins += 5;
             }
           });
         }
-        this.hireReqOnProgress = false;
+        this.actionButtonsStatus[index].hire = false;
+        alert("Candidate hired successfully");
       } catch (e) {
-        alert(e);
+        alert("You can't hire this candidate");
       }
     },
   },
