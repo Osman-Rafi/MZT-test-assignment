@@ -26,27 +26,14 @@
           >
         </div>
         <div class="p-6 float-right">
-          <button
-            @click="contactCandidate(candidate)"
-            class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-          >
-            <div class="flex">
-              <vue-simple-spinner size="small" class="mt-1" />
-              <span class="ml-3">Contact</span>
-            </div>
-          </button>
-          <button
-            @click="hireCandidate(candidate)"
-            class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-          >
-            <div class="flex">
-              <vue-simple-spinner size="small" class="mt-1" />
-              <span class="ml-3">
-                <template v-if="candidate.hired_by">Hired</template>
-                <template v-else>Hire</template>
-              </span>
-            </div>
-          </button>
+          <CandidateActionButtons
+            :candidate="candidate"
+            :loading="loading"
+            :contact-req-on-progress="contactReqOnProgress"
+            :hire-req-on-progress="hireReqOnProgress"
+            @contact-candidate="contactCandidate(candidate)"
+            @hire-candidate="hireCandidate(candidate)"
+          />
         </div>
       </div>
     </div>
@@ -55,17 +42,20 @@
 
 <script>
 import axios from "axios";
-import Spinner from "vue-simple-spinner";
+import CandidateActionButtons from "../components/CandidateActionButtons.vue";
 export default {
   name: "Candidates",
 
   components: {
-    Spinner,
+    CandidateActionButtons,
   },
   data() {
     return {
       candidates: [],
       coins: 0,
+      loading: false,
+      contactReqOnProgress: false,
+      hireReqOnProgress: false,
     };
   },
 
@@ -75,12 +65,14 @@ export default {
 
   methods: {
     async fetchCadidatesListAndCoins() {
+      this.loading = true;
       try {
         const res = await axios.get(
           `/api/get-candidates-list-and-coins/${this.$route.params.id}`
         );
         this.candidates = res.data.candidates;
         this.coins = res.data.coins;
+        this.loading = false;
       } catch (e) {
         console.error(e);
       }
@@ -97,12 +89,13 @@ export default {
         formData.append("company_id", this.$route.params.id);
         formData.append("candidate_email", candidate.email);
         try {
-          alert("Sending email to the candidate....");
+          this.contactReqOnProgress = true;
           const res = await axios.post(`/api/contact-with-candidate`, formData);
           if (res.data.success) {
             this.coins = this.coins -= 5;
             alert("Email sent successfully");
           }
+          this.contactReqOnProgress = false;
         } catch (e) {
           alert(e);
         }
@@ -113,6 +106,7 @@ export default {
       formData.append("candidate_id", candidate.id);
       formData.append("company_id", this.$route.params.id);
       try {
+        this.hireReqOnProgress = true;
         const res = await axios.post(`/api/hire-candidate`, formData);
         if (res.data.success) {
           const data = res.data.data;
@@ -124,9 +118,11 @@ export default {
                 hired_by: data.hired_by,
               };
               this.candidates.splice(index, 1, newCandidate);
+              alert("Candidate hired successfully");
             }
           });
         }
+        this.hireReqOnProgress = false;
       } catch (e) {
         alert(e);
       }
