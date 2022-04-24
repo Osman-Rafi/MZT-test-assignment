@@ -78,8 +78,8 @@ class CandidateController extends Controller
         ]);
 
         /* find candidate & company details */
-        $candidate = Candidate::find($attr['candidate_id'])->first();
-        $company = Company::find($attr['company_id'])->first();
+        $candidate = Candidate::find($attr['candidate_id']);
+        $company = Company::find($attr['company_id']);
 
         /* check if the candidate is available for hire */
         if ($candidate->hired_by !== null) {
@@ -96,7 +96,7 @@ class CandidateController extends Controller
                 /* put back 5 coins to company wallet */
                 $this->coinTransaction(5, $company->id, 'increment');
 
-                return $this->successStatus(true, 'Candidate hired successfully.', 200, ['candidate_id' => $candidate->id, 'company_id' => $company->id]);
+                return $this->successStatus(true, 'Candidate hired successfully.', 200, ['candidate_id' => $candidate->id, 'hired_by' => $company->id]);
             } else {
                 return $this->successStatus(false, 'You must contact with this candidate before hire.', 422);
             }

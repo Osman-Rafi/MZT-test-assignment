@@ -33,9 +33,11 @@
             Contact
           </button>
           <button
+            @click="hireCandidate(candidate)"
             class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 hover:bg-teal-100 rounded shadow"
           >
-            Hire
+            <template v-if="candidate.hired_by">Hired</template>
+            <template v-else>Hire</template>
           </button>
         </div>
       </div>
@@ -92,6 +94,29 @@ export default {
         } catch (e) {
           alert(e);
         }
+      }
+    },
+    async hireCandidate(candidate) {
+      const formData = new FormData();
+      formData.append("candidate_id", candidate.id);
+      formData.append("company_id", this.$route.params.id);
+      try {
+        const res = await axios.post(`/api/hire-candidate`, formData);
+        if (res.data.success) {
+          const data = res.data.data;
+          this.candidates.find((candidate) => {
+            if (candidate.id == data.candidate_id) {
+              const index = this.candidates.indexOf(candidate);
+              const newCandidate = {
+                ...candidate,
+                hired_by: data.hired_by,
+              };
+              this.candidates.splice(index, 1, newCandidate);
+            }
+          });
+        }
+      } catch (e) {
+        alert(e);
       }
     },
   },
