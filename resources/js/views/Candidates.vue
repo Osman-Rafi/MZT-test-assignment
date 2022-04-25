@@ -26,47 +26,48 @@
           >
         </div>
         <div class="p-6 float-right">
-          <button
-            @click="contactCandidate(candidate, index)"
-            class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-          >
-            <div class="flex">
-              <vue-simple-spinner
-                v-if="actionButtonsStatus[index].contact"
-                size="small"
-                class="mt-1"
-              />
-              <span class="ml-3">
-                <template v-if="actionButtonsStatus[index].contact"
-                  >Contacting..</template
-                >
-                <template v-else>Contact</template>
-              </span>
-            </div>
-          </button>
           <button v-if="candidate.hired_by" class="mx-5">Hired</button>
-          <button
-            v-else
-            @click="hireCandidate(candidate, index)"
-            class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-          >
-            <div class="flex">
-              <vue-simple-spinner
-                v-if="actionButtonsStatus[index].hire"
-                size="small"
-                class="mt-1"
-              />
-              <span class="ml-3">
-                <template v-if="candidate.hired_by">Hired</template>
-                <template v-else>
-                  <template v-if="actionButtonsStatus[index].hire"
-                    >Hiring..</template
+          <template v-else>
+            <button
+              @click="contactCandidate(candidate, index)"
+              class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+            >
+              <div class="flex">
+                <vue-simple-spinner
+                  v-if="actionButtonsStatus[index].contact"
+                  size="small"
+                  class="mt-1"
+                />
+                <span class="ml-3">
+                  <template v-if="actionButtonsStatus[index].contact"
+                    >Contacting..</template
                   >
-                  <template v-else>Hire</template>
-                </template>
-              </span>
-            </div>
-          </button>
+                  <template v-else>Contact</template>
+                </span>
+              </div>
+            </button>
+            <button
+              @click="hireCandidate(candidate, index)"
+              class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+            >
+              <div class="flex">
+                <vue-simple-spinner
+                  v-if="actionButtonsStatus[index].hire"
+                  size="small"
+                  class="mt-1"
+                />
+                <span class="ml-3">
+                  <template v-if="candidate.hired_by">Hired</template>
+                  <template v-else>
+                    <template v-if="actionButtonsStatus[index].hire"
+                      >Hiring..</template
+                    >
+                    <template v-else>Hire</template>
+                  </template>
+                </span>
+              </div>
+            </button>
+          </template>
         </div>
       </div>
     </div>
@@ -129,12 +130,12 @@ export default {
           const res = await axios.post(`/api/contact-with-candidate`, formData);
           if (res.data.success) {
             this.coins = this.coins -= 5;
-            this.actionButtonsStatus[index].contact = false;
             alert("Email sent successfully");
           }
         } catch (e) {
           alert(e);
         }
+        this.actionButtonsStatus[index].contact = false;
       }
     },
     async hireCandidate(candidate, index) {
@@ -158,11 +159,11 @@ export default {
             }
           });
         }
-        this.actionButtonsStatus[index].hire = false;
         alert("Candidate hired successfully");
       } catch (e) {
         alert("You can't hire this candidate");
       }
+      this.actionButtonsStatus[index].hire = false;
     },
   },
 };
